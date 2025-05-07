@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <style>
+    /* Basic reset and layout */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f7f7f7; color: #333; }
+    header, main, footer { max-width: 1200px; width: 90%; margin: auto; padding: 20px; }
+    
+    /* Header & Navigation */
+    .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .logo img { width: 60px; height: 60px; object-fit: contain; }
+    nav ul { display: flex; gap: 15px; list-style: none; }
+    nav a { color: #8e44ad; border: 1px solid #8e44ad; padding: 6px 12px; border-radius: 4px; text-decoration: none; transition: background 0.3s ease; }
+    nav a:hover { background: #8e44ad; color: #fff; }
+    .title-container { text-align: center; margin-bottom: 20px; }
+    
+    /* Flashcards Section */
+    #flashcards-section {
+      background: #fff; padding: 30px; border-radius: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center;
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    #flashcards-section.hidden { opacity: 0; transform: translateY(-30px); pointer-events: none; }
+    #prompt { font-size: 1.3rem; margin-bottom: 20px; }
+    #show-answer-btn { background: #8e44ad; color: #fff; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; margin-bottom: 20px; }
+    #show-answer-btn:hover { background: #6a1b9a; }
+    
+    /* Answer Section */
+    #answer-section { display: none; margin-bottom: 20px; }
+    #answer { font-size: 1.3rem; margin-bottom: 10px; font-weight: bold; }
+    .explanation-box { padding: 10px; margin-top: 10px; border-left: 4px solid #00acc1; border-radius: 4px; background-color: #e0f7fa; animation: fadeIn 0.8s ease; max-width: 600px; margin: 10px auto; text-align: left; }
+    .explanation-box h4 { margin-bottom: 6px; color: #00acc1; font-weight: bold; }
+    .memory-tip-box { padding: 10px; margin-top: 10px; border-left: 4px solid #f9a825; border-radius: 4px; background-color: #fff9c4; animation: fadeIn 0.8s ease; max-width: 600px; margin: 10px auto; text-align: left; }
+    .memory-tip-box h4 { margin-bottom: 6px; color: #f9a825; font-weight: bold; }
+    @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+    
+    /* Rating Buttons for Flashcards (4 options) */
+    #rating {
+      margin-top: 15px; text-align: center;
+    }
+    #rating p { margin-bottom: 8px; }
+    #rating-hard { background-color: orange; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    #rating-good { background-color: green; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    #rating-easy { background-color: blue; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    #rating-bad { background-color: red; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    
+    /* Footer */
+    footer { text-align: center; font-size: 0.85rem; color: #777; border-top: 1px solid #ddd; padding: 10px 0; margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <!-- FORCE LOGIN CHECK -->
+  <script>
+    const user = localStorage.getItem('loggedInUser');
+    if (!user) { window.location.href = "login.html"; }
+  </script>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section" id="home">
+    <h1>InvestiQuizz Flashcards</h1>
+    <p>Reinforce your financial knowledge with active recall and spaced repetition.</p>
+    <button class="hero-cta" onclick="scrollToFlashcards()">Start Flashcards</button>
+  </section>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <title>InvestiQuizz - Flashcards</title>
+        <img src="logo.png" alt="InvestiQuizz Logo"/>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="flashcards.html">Flashcards</a></li>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="achievements.html">Achievements</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="title-container" style="text-align:center;">
+      <h2>Your Financial Flashcards</h2>
+      <p id="welcomeMessage">Hello, <?php // placeholder, replaced by JS ?></p>
+    </div>
+  </header>
+
+  <!-- MAIN FLASHCARDS CONTENT -->
+  <main>
+    <section id="flashcards-section">
+      <h2>Flashcard:</h2>
+      <p id="prompt"></p>
+      <button id="show-answer-btn">Show Answer</button>
+      <div id="answer-section">
+        <p id="answer"></p>
+        <div class="explanation-box">
+          <h4>Explanation</h4>
+          <p id="explanation"></p>
+        </div>
+        <div class="memory-tip-box">
+          <h4>Memory Tip</h4>
+          <p id="memoryTip"></p>
+        </div>
+        <div id="rating">
+          <p>Rate your recall:</p>
+          <button id="rating-hard">Hard</button>
+          <button id="rating-good">Good</button>
+          <button id="rating-easy">Easy</button>
+          <button id="rating-bad">Bad</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 InvestiQuizz | Made by IE students | All rights reserved.</p>
+  </footer>
+
+  <script>
+    /******************************************
+     * SCROLL FUNCTION
+     ******************************************/
+    function scrollToFlashcards() {
+      document.getElementById("flashcards-section").scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Greet user
+    document.getElementById('welcomeMessage').textContent = `Hello, ${localStorage.getItem('loggedInUser')}!`;
+    
+    /******************************************
+     * FLASHCARD DATA & SPACED REP SETUP
+     ******************************************/
+    const flashcards = [
+      {
+        prompt: "Define compound interest.",
+        answer: "Compound interest is the interest on both the initial principal and the accumulated interest from previous periods.",
+        explanation: "This means your money grows at an accelerating rate because interest is earned on interest.",
+        memoryTip: "Visualize a snowball that grows bigger as it rolls down a hill."
+      },
+      {
+        prompt: "What does diversification mean in investing?",
+        answer: "Diversification is spreading your investments across various assets to reduce risk.",
+        explanation: "It minimizes risk by ensuring that not all your investments are affected by the poor performance of a single asset.",
+        memoryTip: "Think of it as not putting all your eggs in one basket."
+      },
+      {
+        prompt: "Define liquidity.",
+        answer: "Liquidity is how quickly an asset can be converted into cash without significantly affecting its price.",
+        explanation: "High liquidity means you can easily sell the asset at a fair price; low liquidity means it may take longer or incur a price drop.",
+        memoryTip: "Imagine water that flows easily versus thick syrup that moves slowly."
+      },
+      {
+        prompt: "What is a dividend?",
+        answer: "A dividend is a portion of a company's earnings distributed to its shareholders.",
+        explanation: "It represents a way for companies to share profits with investors, usually paid on a regular basis.",
+        memoryTip: "Think of it as a bonus check for owning part of the company."
+      },
+      {
+        prompt: "Explain the concept of risk versus reward.",
+        answer: "Risk versus reward refers to the balance between the potential risk of an investment and the potential return.",
+        explanation: "Generally, higher potential returns come with higher risk; lower risk investments tend to offer lower returns.",
+        memoryTip: "Imagine balancing a scale between safety and high returns."
+      }
+    ];
+    
+    // Spaced repetition intervals
+    const baseIntervalIncorrect = 5 * 60 * 1000;  
+    const baseIntervalCorrect   = 20 * 60 * 1000; 
+    const easyBonus = 1.3;
+    const hardMultiplier = 1.2;
+    
+    flashcards.forEach(card => {
+      card.correctStreak = 0;
+      card.ease = 2.5;
+      card.interval = baseIntervalIncorrect;
+      card.nextDue = Date.now();
+    });
+    
+    let currentCard = null;
+    
+    function getNextCard() {
+      const now = Date.now();
+      let dueCards = flashcards.filter(card => card.nextDue <= now);
+      if (dueCards.length > 0) {
+        dueCards.sort((a, b) => a.nextDue - b.nextDue);
+        return dueCards[0];
+      } else {
+        let sorted = flashcards.slice().sort((a, b) => a.nextDue - b.nextDue);
+        return sorted[0];
+      }
+    }
+    
+    function scheduleNextCard() {
+      let nextCard = getNextCard();
+      let now = Date.now();
+      let delay = nextCard.nextDue - now;
+      if (delay < 0) delay = 0;
+      setTimeout(() => {
+        currentCard = nextCard;
+        displayCard(currentCard);
+      }, delay);
+    }
+    
+    function displayCard(card) {
+      document.getElementById('prompt').textContent = card.prompt;
+      // Hide answer section initially
+      document.getElementById('answer-section').style.display = "none";
+      document.getElementById('show-answer-btn').style.display = "inline-block";
+      document.getElementById('rating').style.display = "none";
+    }
+    
+    document.getElementById('show-answer-btn').addEventListener('click', () => {
+      document.getElementById('answer').textContent = currentCard.answer;
+      document.getElementById('explanation').textContent = currentCard.explanation;
+      document.getElementById('memoryTip').textContent = currentCard.memoryTip;
+      document.getElementById('answer-section').style.display = "block";
+      document.getElementById('show-answer-btn').style.display = "none";
+      document.getElementById('rating').style.display = "block";
+    });
+    
+    // Rating buttons for flashcards
+    document.getElementById('rating-hard').addEventListener('click', () => processCardRating("Hard"));
+    document.getElementById('rating-good').addEventListener('click', () => processCardRating("Good"));
+    document.getElementById('rating-easy').addEventListener('click', () => processCardRating("Easy"));
+    document.getElementById('rating-bad').addEventListener('click', () => processCardRating("Bad"));
+    
+    function processCardRating(rating) {
+      const now = Date.now();
+      if (rating === "Bad") {
+        // For a bad recall, reset the card’s streak and ease
+        currentCard.ease = 1.3;
+        currentCard.correctStreak = 0;
+        currentCard.interval = baseIntervalIncorrect;
+      } else if (rating === "Hard") {
+        currentCard.ease = Math.max(currentCard.ease - 0.15, 1.3);
+        if (currentCard.correctStreak === 0) {
+          currentCard.interval = baseIntervalCorrect;
+        } else {
+          currentCard.interval *= hardMultiplier;
+        }
+        currentCard.correctStreak++;
+      } else if (rating === "Good") {
+        if (currentCard.correctStreak === 0) {
+          currentCard.interval = baseIntervalCorrect;
+        } else {
+          currentCard.interval *= currentCard.ease;
+        }
+        currentCard.correctStreak++;
+      } else if (rating === "Easy") {
+        if (currentCard.correctStreak === 0) {
+          currentCard.interval = baseIntervalCorrect;
+        } else {
+          currentCard.interval *= (currentCard.ease * easyBonus);
+        }
+        currentCard.ease += 0.15;
+        currentCard.correctStreak++;
+      }
+      
+      currentCard.nextDue = now + currentCard.interval;
+      scheduleNextCard();
+    }
+    
+    // Start flashcards game
+    scheduleNextCard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Culture-G - A propos</title>
+    <link rel="stylesheet" href="styles2.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <img src="logo.png" alt="Logo Culture-G" />
+            </div>
+            <div class="title-container">
+                <h1>A propos</h1>
+                <h2 id="welcomeMessage"></h2>
+                <p>Voici le classement des meilleurs joueurs :</p>
+            </div>
+        </div>
+    </header>
+    <main>
+			<section id="quiz-section">
+			<h3>À propos de Culture-G</h3>
+			<p>
+				Culture-G est un site web conçu pour tester vos connaissances générales de manière ludique et éducative. Que vous soyez passionné d'histoire, de géographie, de science, ou d'arts, vous trouverez ici des quiz pour défier votre culture générale et enrichir vos connaissances.
+			</p>
+			<p>
+				Nous proposons des quiz variés, allant des questions les plus simples aux plus difficiles, couvrant un large éventail de sujets. Le site vous permet de jouer seul ou de participer à des classements pour mesurer vos performances par rapport à d'autres joueurs du monde entier.
+			</p>
+			</section>
+			<section id="quiz-section">
+			<h4>Notre Mission</h4>
+			<p>
+				Notre objectif est de rendre l'apprentissage interactif et amusant. En vous offrant un large éventail de questions, nous voulons vous encourager à apprendre de manière active tout en vous divertissant.
+			</p>
+			</section>
+			<section id="quiz-section">
+			<h4>Comment ça fonctionne ?</h4>
+			<p>
+				Vous pouvez accéder à une série de quiz, répondre à des questions et accumuler des points. Plus vous répondez correctement et rapidement, plus votre score est élevé. Les meilleurs joueurs sont affichés dans le classement global, vous permettant de voir comment vous vous situez parmi les autres utilisateurs.
+			</p>
+			</section>
+			<section id="quiz-section">
+			<h4>Nos valeurs</h4>
+			<ul>
+				<li><strong>Accessibilité :</strong> Nous souhaitons rendre la culture générale accessible à tous, peu importe l'âge ou le niveau.</li>
+				<li><strong>Éducation ludique :</strong> Apprendre tout en s'amusant est notre priorité.</li>
+				<li><strong>Communauté :</strong> Nous croyons en l'importance de l'échange et du partage des connaissances.</li>
+			</ul>
+			</section>
+			<section id="quiz-section">
+			<h4>Nous contacter</h4>
+			<p>
+				Pour toute question ou suggestion, n'hésitez pas à nous contacter via notre page <a href="contact.html">Contact</a>. Nous sommes toujours heureux de recevoir vos retours.
+			</p>
+		
+        </section>
+    </main>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Culture-G</h4>
+                <p>Le site pour tester vos connaissances générales tout en vous amusant.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Liens rapides</h4>
+                <ul>
+                    <li><a href="home.html">Accueil</a></li>
+                    <li><a href="Classement.html">Classement</a></li>
+                    <li><a href="#">À propos</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Suivez-nous</h4>
+                <ul>
+                    <li><a href="https://www.facebook.com/login/?locale=fr_FR">Facebook</a></li>
+                    <li><a href="https://www.instagram.com/">Instagram</a></li>
+                    <li><a href="https://x.com/?lang=fr">X-twitter</a></li>
+                    <li><a href="https://fr.linkedin.com/">LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="footer-bottom">&copy; 2024 Culture-G | Tous droits réservés.</p>
+    </footer>
+    <script src="player.js"></script>
+</body>
+</html>

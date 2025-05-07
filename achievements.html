@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvestiQuizz - Achievements</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+    header, main, footer { max-width: 1200px; width: 90%; margin: auto; padding: 20px; }
+    nav ul { display: flex; gap: 15px; list-style: none; }
+    nav a { color: #8e44ad; border: 1px solid #8e44ad; padding: 6px 12px; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+    nav a:hover { background: #8e44ad; color: #fff; }
+    h1 { text-align: center; color: #8e44ad; margin-bottom: 20px; }
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .achievement-card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .achievement-card h3 { margin-bottom: 10px; font-size: 1.1rem; color: #6a1b9a; }
+    .locked { opacity: 0.4; filter: grayscale(80%); }
+    footer { text-align: center; border-top: 1px solid #ddd; padding: 10px 0; margin-top: 30px; font-size: 0.85rem; color: #777; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="quiz.html">Quiz</a></li>
+        <li><a href="flashcards.html">Flashcards</a></li>
+        <li><a href="achievements.html">Achievements</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <h1>Your Achievements</h1>
+    <div class="achievements-grid" id="achievementsContainer"></div>
+  </main>
+  <footer>
+    <p>&copy; 2025 InvestiQuizz</p>
+  </footer>
+  <script>
+    // Define a larger set of achievements
+    const allAchievements = [
+      {
+        key: 'firstCorrect',
+        title: 'First Correct Answer',
+        description: 'You got your first question right!',
+        icon: '🏆'
+      },
+      {
+        key: 'highScore500',
+        title: 'High Roller',
+        description: 'Reached a portfolio of $500!',
+        icon: '💰'
+      },
+      {
+        key: 'highScore1000',
+        title: 'Investment Guru',
+        description: 'Achieved a portfolio of $1000!',
+        icon: '🚀'
+      },
+      {
+        key: 'tenStreak',
+        title: 'Hot Streak',
+        description: 'Answered 10 questions correctly in a row!',
+        icon: '🔥'
+      },
+      {
+        key: 'budgetMaster',
+        title: 'Budget Master',
+        description: 'Created and followed a monthly budget for 3 consecutive months!',
+        icon: '📊'
+      },
+      {
+        key: 'savingsChampion',
+        title: 'Savings Champion',
+        description: 'Saved at least 20% of your income for 6 months!',
+        icon: '💵'
+      },
+      {
+        key: 'investmentWhiz',
+        title: 'Investment Whiz',
+        description: 'Built a diversified portfolio with strong returns!',
+        icon: '📈'
+      },
+      {
+        key: 'diversificationPro',
+        title: 'Diversification Pro',
+        description: 'Invested in at least 5 different asset classes!',
+        icon: '🌐'
+      },
+      {
+        key: 'smartSpender',
+        title: 'Smart Spender',
+        description: 'Cut unnecessary expenses by 30% for a month!',
+        icon: '🛍️'
+      },
+      {
+        key: 'financialPlanner',
+        title: 'Financial Planner',
+        description: 'Created a comprehensive 5-year financial plan!',
+        icon: '🗓️'
+      }
+    ];
+    
+    const achievementsData = JSON.parse(localStorage.getItem('achievements')) || {};
+    const container = document.getElementById('achievementsContainer');
+    
+    allAchievements.forEach(ach => {
+      const isUnlocked = achievementsData[ach.key];
+      const card = document.createElement('div');
+      card.classList.add('achievement-card');
+      if (!isUnlocked) {
+        card.classList.add('locked');
+      }
+      card.innerHTML = `
+        <h3>${ach.icon} ${ach.title}</h3>
+        <p>${ach.description}</p>
+        <p>${isUnlocked ? "Unlocked" : "Locked"}</p>
+      `;
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>
