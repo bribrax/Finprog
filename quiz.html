@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InvestiQuizz - Quiz Game</title>
+  <style>
+    /* Basic reset and layout */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, Helvetica, sans-serif; background: #f7f7f7; color: #333; overflow-x: hidden; }
+    header, main, footer { max-width: 1200px; width: 90%; margin: auto; padding: 20px; }
+    
+    /* Header & Navigation */
+    .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .logo img { width: 60px; height: 60px; object-fit: contain; }
+    nav ul { display: flex; gap: 15px; list-style: none; }
+    nav a { color: #8e44ad; border: 1px solid #8e44ad; padding: 6px 12px; border-radius: 4px; text-decoration: none; transition: background 0.3s ease; }
+    nav a:hover { background: #8e44ad; color: #fff; }
+    .title-container { text-align: center; margin-bottom: 20px; }
+    .title-container h2 { margin-bottom: 8px; font-size: 1.5rem; }
+    #shareScoreBtn { background: #8e44ad; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    #shareScoreBtn:hover { background: #6a1b9a; }
+    
+    /* Quiz Section */
+    #quiz-section { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; transition: opacity 0.5s, transform 0.5s; }
+    #quiz-section.hidden { opacity: 0; transform: translateY(-30px); pointer-events: none; }
+    #question { font-size: 1.2rem; margin-bottom: 16px; line-height: 1.4; }
+    #answers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
+    .answer-btn { background: #e0e0e0; border: none; padding: 12px; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+    .answer-btn:hover { background: #bbb; }
+    
+    /* Other types (Fill, True/False) */
+    #other-types-container { display: none; }
+    #fill-blank-input { padding: 10px; margin-bottom: 10px; width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 4px; }
+    #submit-other-btn { background: #e0e0e0; border: none; padding: 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; transition: background 0.3s; }
+    #submit-other-btn:hover { background: #bbb; }
+    #true-false-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+    .tf-btn { background: #e0e0e0; border: none; padding: 12px; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+    .tf-btn:hover { background: #bbb; }
+    
+    /* Feedback: Explanation and Memory Tip boxes */
+    #feedback { margin-top: 12px; font-size: 1rem; }
+    .explanation-box {
+      padding: 10px; margin-top: 10px; border-left: 4px solid #00acc1; border-radius: 4px;
+      background-color: #e0f7fa; animation: fadeIn 0.8s ease;
+      max-width: 600px; margin: 10px auto;
+    }
+    .explanation-box h4 { margin-bottom: 6px; color: #00acc1; font-weight: bold; }
+    .memory-tip-box {
+      padding: 10px; margin-top: 10px; border-left: 4px solid #f9a825; border-radius: 4px;
+      background-color: #fff9c4; animation: fadeIn 0.8s ease;
+      max-width: 600px; margin: 10px auto;
+    }
+    .memory-tip-box h4 { margin-bottom: 6px; color: #f9a825; font-weight: bold; }
+    @keyframes fadeIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+    
+    /* Rating & Next Buttons */
+    #rating, #next-btn-container { margin-top: 15px; text-align: center; }
+    #rating p { margin-bottom: 8px; }
+    /* Rating buttons (quiz uses 3 options) */
+    #rating-hard { background-color: orange; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    #rating-good { background-color: green; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    #rating-easy { background-color: blue; color: #fff; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 4px; cursor: pointer; }
+    #next-button { display: inline-block; padding: 10px 20px; background-color: #8e44ad; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    #next-button:hover { background-color: #6a1b9a; }
+    
+    /* Score display */
+    #scoreDisplay { font-weight: bold; color: #6a1b9a; margin-top: 5px; text-align: center; }
+    
+    /* Footer */
+    footer { background: #fff; border-top: 1px solid #ddd; margin-top: 30px; text-align: center; padding: 10px 0; }
+  </style>
+</head>
+<body>
+  <!-- FORCE LOGIN CHECK -->
+  <script>
+    const user = localStorage.getItem('loggedInUser');
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section" id="home">
+    <h1>Welcome to InvestiQuizz</h1>
+    <p>Improve your financial knowledge one question at a time!</p>
+    <button class="hero-cta" onclick="scrollToQuiz()">Start the Quiz</button>
+  </section>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <div class="logo">
+        <img src="logo.png" alt="InvestiQuizz Logo"/>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="quiz.html">Quiz</a></li>
+          <li><a href="flashcards.html">Flashcards</a></li>
+          <li><a href="leaderboard.html">Leaderboard</a></li>
+          <li><a href="achievements.html">Achievements</a></li>
+        </ul>
+      </nav>
+      <!-- Share Score button moved to header -->
+      <button id="shareScoreBtn" onclick="shareScore()">Share Score</button>
+    </div>
+    <div class="title-container">
+      <h2>Your Personalized Finance Quiz</h2>
+      <p id="welcomeMessage">Hello, <?php // placeholder, replaced by JS ?></p>
+      <p id="scoreDisplay">Portfolio: $0</p>
+    </div>
+  </header>
+
+  <!-- MAIN QUIZ CONTENT -->
+  <main>
+    <section id="quiz-section">
+      <h2>Question:</h2>
+      <p id="question"></p>
+
+      <!-- MCQ Buttons -->
+      <div id="answers">
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+      </div>
+
+      <!-- Other Question Types -->
+      <div id="other-types-container">
+        <input type="text" id="fill-blank-input" placeholder="Type your answer here" />
+        <div id="true-false-buttons">
+          <button class="tf-btn" data-tf="True">True</button>
+          <button class="tf-btn" data-tf="False">False</button>
+        </div>
+        <button id="submit-other-btn">Submit Answer</button>
+      </div>
+
+      <p id="feedback"></p>
+
+      <!-- Instead of share container, Next button is placed centrally here -->
+      <div id="next-btn-container" style="display: none;">
+        <button id="next-button">Next</button>
+      </div>
+
+      <!-- Rating (only shows when correct) -->
+      <div id="rating" style="display: none;">
+        <p>Rate your recall:</p>
+        <button id="rating-hard">Hard</button>
+        <button id="rating-good">Good</button>
+        <button id="rating-easy">Easy</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 InvestiQuizz | Made by IE students | All rights reserved.</p>
+  </footer>
+
+  <!-- SOUND EFFECTS -->
+  <audio id="correctSound" src="correct.wav" preload="auto"></audio>
+  <audio id="wrongSound" src="wrong.wav" preload="auto"></audio>
+
+  <script>
+    /******************************************
+     * SCROLL FUNCTION
+     ******************************************/
+    function scrollToQuiz() {
+      document.getElementById("quiz-section").scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Set greeting
+    const loggedInUser = localStorage.getItem('loggedInUser');
+    document.getElementById('welcomeMessage').textContent = `Hello, ${loggedInUser}!`;
+    
+    /******************************************
+     * QUIZ DATA (Additional Questions)
+     ******************************************/
+    const questions = [
+      {
+        question: "What is the main advantage of a long-term savings account?",
+        type: "MCQ",
+        answers: ["Accumulate higher interest", "No monthly fees forever", "Pay regular bills", "Replace a credit card"],
+        correctAnswer: "Accumulate higher interest",
+        score: 100,
+        explanation: "Long-term savings accounts reward you with higher interest rates for keeping money deposited over time.",
+        memoryTip: "Imagine your money as seeds that need time to blossom into a full garden."
+      },
+      {
+        question: "Which factor most influences compound interest growth?",
+        type: "MCQ",
+        answers: ["Initial deposit", "Interest rate", "Frequency of withdrawals", "Time invested"],
+        correctAnswer: "Time invested",
+        score: 100,
+        explanation: "The longer you invest, the more compound interest can work its magic, earning interest on interest.",
+        memoryTip: "Visualize a snowball growing larger the longer it rolls down a hill."
+      },
+      {
+        question: "Fill in the blank: _______ interest is calculated on both the principal and previously earned interest.",
+        type: "FILL_BLANK",
+        correctAnswer: "compound",
+        score: 80,
+        explanation: "Compound interest adds your earned interest back to the principal, accelerating growth.",
+        memoryTip: "Think of it as building layers that get thicker over time."
+      },
+      {
+        question: "True or False: Government bonds are considered one of the safest investment options.",
+        type: "TRUE_FALSE",
+        correctAnswer: "False",  // (Actually: False, they are safe)
+        score: 50,
+        explanation: "Government bonds are generally low-risk, making them a safe component in a diversified portfolio.",
+        memoryTip: "Bonds act as a safety net compared to riskier assets."
+      },
+      {
+        question: "What does 'diversification' in investing mean?",
+        type: "MCQ",
+        answers: ["Invest in one asset", "Spread your investments", "Focus on high-risk assets", "Avoid foreign markets"],
+        correctAnswer: "Spread your investments",
+        score: 100,
+        explanation: "Diversification minimizes risk by spreading your investments across different asset classes.",
+        memoryTip: "Never put all your eggs in one basket!"
+      },
+      {
+        question: "Which type of account typically offers the highest interest?",
+        type: "MCQ",
+        answers: ["Checking account", "Savings account", "Money market account", "Certificate of deposit"],
+        correctAnswer: "Certificate of deposit",
+        score: 100,
+        explanation: "Certificates of deposit (CDs) usually offer higher interest rates for locking in your money for a set period.",
+        memoryTip: "Think of CDs as a fixed-term boost to your savings."
+      }
+    ];
+    
+    // BASE INTERVALS for spaced repetition
+    const baseIntervalIncorrect = 5 * 60 * 1000;  
+    const baseIntervalCorrect   = 20 * 60 * 1000; 
+    const easyBonus = 1.3;
+    const hardMultiplier = 1.2;
+    
+    // Initialize spaced repetition properties for each question
+    questions.forEach(q => {
+      q.correctStreak = 0;
+      q.ease = 2.5;
+      q.interval = baseIntervalIncorrect;
+      q.nextDue = Date.now();
+    });
+    
+    /******************************************
+     * QUIZ LOGIC
+     ******************************************/
+    let portfolioValue = parseInt(localStorage.getItem('portfolioValue') || "0", 10);
+    let currentQuestion = null;
+    
+    const quizSection = document.getElementById('quiz-section');
+    const questionElement = document.getElementById('question');
+    const answerButtons = document.querySelectorAll('.answer-btn');
+    const feedbackElement = document.getElementById('feedback');
+    const ratingDiv = document.getElementById('rating');
+    const ratingHardBtn = document.getElementById('rating-hard');
+    const ratingGoodBtn = document.getElementById('rating-good');
+    const ratingEasyBtn = document.getElementById('rating-easy');
+    const nextBtnContainer = document.getElementById('next-btn-container');
+    const nextButton = document.getElementById('next-button');
+    const correctSound = document.getElementById('correctSound');
+    const wrongSound = document.getElementById('wrongSound');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    
+    function updatePortfolioDisplay() {
+      scoreDisplay.textContent = `Portfolio: $${portfolioValue}`;
+    }
+    updatePortfolioDisplay();
+    
+    function displayQuestion(q) {
+      quizSection.classList.remove('hidden');
+      feedbackElement.innerHTML = "";
+      ratingDiv.style.display = "none";
+      nextBtnContainer.style.display = "none";
+      
+      // Reset other-type UI
+      document.getElementById('other-types-container').style.display = "none";
+      document.getElementById('fill-blank-input').style.display = "none";
+      document.getElementById('fill-blank-input').value = "";
+      document.getElementById('submit-other-btn').style.display = "none";
+      document.querySelectorAll('.tf-btn').forEach(btn => {
+        btn.style.display = "none";
+        btn.disabled = false;
+        btn.style.backgroundColor = "#e0e0e0";
+      });
+      
+      questionElement.textContent = q.question;
+      if (q.type === "MCQ") {
+        document.getElementById('answers').style.display = "grid";
+        answerButtons.forEach((button, i) => {
+          button.textContent = q.answers[i] || "";
+          button.disabled = false;
+          button.style.backgroundColor = "#e0e0e0";
+          button.style.display = q.answers[i] ? "block" : "none";
+        });
+      } else if (q.type === "FILL_BLANK") {
+        document.getElementById('answers').style.display = "none";
+        document.getElementById('other-types-container').style.display = "block";
+        document.getElementById('fill-blank-input').style.display = "block";
+        document.getElementById('submit-other-btn').style.display = "inline-block";
+      } else if (q.type === "TRUE_FALSE") {
+        document.getElementById('answers').style.display = "none";
+        document.getElementById('other-types-container').style.display = "block";
+        document.querySelectorAll('.tf-btn').forEach(btn => btn.style.display = "inline-block");
+      }
+    }
+    
+    function getNextQuestion() {
+      let now = Date.now();
+      let dueQuestions = questions.filter(q => q.nextDue <= now);
+      if (dueQuestions.length > 0) {
+        dueQuestions.sort((a, b) => a.nextDue - b.nextDue);
+        return dueQuestions[0];
+      } else {
+        let sorted = questions.slice().sort((a, b) => a.nextDue - b.nextDue);
+        return sorted[0];
+      }
+    }
+    
+    function scheduleNextQuestion() {
+      let nextQ = getNextQuestion();
+      let now = Date.now();
+      let delay = nextQ.nextDue - now;
+      if (delay < 0) delay = 0;
+      setTimeout(() => {
+        currentQuestion = nextQ;
+        displayQuestion(currentQuestion);
+      }, delay);
+    }
+    
+    // Start the quiz
+    scheduleNextQuestion();
+    
+    // MCQ handler
+    answerButtons.forEach(button => {
+      button.addEventListener('click', e => {
+        let selected = e.target.textContent;
+        answerButtons.forEach(b => b.disabled = true);
+        if (selected === currentQuestion.correctAnswer) {
+          showCorrectFeedback(e.target);
+        } else {
+          showWrongFeedback(e.target);
+        }
+      });
+    });
+    
+    // Handlers for fill/true-false
+    document.getElementById('submit-other-btn').addEventListener('click', () => {
+      let val = document.getElementById('fill-blank-input').value.trim().toLowerCase();
+      if (val === currentQuestion.correctAnswer.toLowerCase()) {
+        showCorrectFeedback();
+      } else {
+        showWrongFeedback();
+      }
+    });
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        let val = e.target.getAttribute('data-tf');
+        document.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
+        if (val === currentQuestion.correctAnswer) {
+          showCorrectFeedback(e.target);
+        } else {
+          showWrongFeedback(e.target);
+        }
+      });
+    });
+    
+    function showCorrectFeedback(clickedBtn = null) {
+      if (clickedBtn) clickedBtn.style.backgroundColor = "green";
+      correctSound.play();
+      feedbackElement.innerHTML = `
+        <div class="explanation-box">
+          <h4>Explanation</h4>
+          <p>${currentQuestion.explanation}</p>
+        </div>
+      `;
+      feedbackElement.innerHTML += `
+        <div class="memory-tip-box">
+          <h4>Memory Tip</h4>
+          <p>${currentQuestion.memoryTip}</p>
+        </div>
+      `;
+      ratingDiv.style.display = "block";
+    }
+    
+    function showWrongFeedback(clickedBtn = null) {
+      if (clickedBtn) clickedBtn.style.backgroundColor = "red";
+      wrongSound.play();
+      feedbackElement.innerHTML = `
+        <div class="explanation-box">
+          <h4>Explanation</h4>
+          <p>${currentQuestion.explanation}</p>
+        </div>
+      `;
+      feedbackElement.innerHTML += `
+        <div class="memory-tip-box">
+          <h4>Memory Tip</h4>
+          <p>${currentQuestion.memoryTip}</p>
+        </div>
+      `;
+      nextBtnContainer.style.display = "block";
+    }
+    
+    nextButton.addEventListener('click', () => processRating("Again"));
+    ratingHardBtn.addEventListener('click', () => processRating("Hard"));
+    ratingGoodBtn.addEventListener('click', () => processRating("Good"));
+    ratingEasyBtn.addEventListener('click', () => processRating("Easy"));
+    
+    function processRating(rating) {
+      let now = Date.now();
+      if (rating === "Again") {
+        currentQuestion.ease = Math.max(currentQuestion.ease - 0.2, 1.3);
+        currentQuestion.correctStreak = 0;
+        currentQuestion.interval = baseIntervalIncorrect;
+      } else if (rating === "Hard") {
+        currentQuestion.ease = Math.max(currentQuestion.ease - 0.15, 1.3);
+        if (currentQuestion.correctStreak === 0) {
+          currentQuestion.interval = baseIntervalCorrect;
+        } else {
+          currentQuestion.interval *= hardMultiplier;
+        }
+        currentQuestion.correctStreak++;
+        portfolioValue += currentQuestion.score;
+      } else if (rating === "Good") {
+        if (currentQuestion.correctStreak === 0) {
+          currentQuestion.interval = baseIntervalCorrect;
+        } else {
+          currentQuestion.interval *= currentQuestion.ease;
+        }
+        currentQuestion.correctStreak++;
+        portfolioValue += currentQuestion.score;
+      } else if (rating === "Easy") {
+        if (currentQuestion.correctStreak === 0) {
+          currentQuestion.interval = baseIntervalCorrect;
+        } else {
+          currentQuestion.interval *= (currentQuestion.ease * easyBonus);
+        }
+        currentQuestion.ease += 0.15;
+        currentQuestion.correctStreak++;
+        portfolioValue += currentQuestion.score;
+      }
+      
+      currentQuestion.nextDue = now + currentQuestion.interval;
+      updatePortfolioDisplay();
+      localStorage.setItem('portfolioValue', portfolioValue.toString());
+      // Optionally update leaderboard...
+      
+      ratingDiv.style.display = "none";
+      nextBtnContainer.style.display = "none";
+      quizSection.classList.add('hidden');
+      
+      setTimeout(scheduleNextQuestion, 1500);
+    }
+    
+    /******************************************
+     * SOCIAL SHARE (Header Button)
+     ******************************************/
+    function shareScore() {
+      const shareData = {
+        title: "InvestiQuizz",
+        text: `I just scored $${portfolioValue} on InvestiQuizz! Can you beat my score?`,
+        url: window.location.href
+      };
+      if (navigator.share) {
+        navigator.share(shareData).catch(console.error);
+      } else {
+        alert("Sharing not supported on this browser. Copy the link and share manually!");
+      }
+    }
+  </script>
+</body>
+</html>
