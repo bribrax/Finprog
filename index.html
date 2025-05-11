@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mag de la GGF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+        .lecteur {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 90%;
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        p {
+            color: #333;
+        }
+        video {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #1b2327;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 7px;
+            margin: 7px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5b6062;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="lecteur">
+        <h1>MAG de la GGF</h1>
+        <p>Heart-Shaped Box de Nirvana par Ulysse</p>
+        <video id="videoPlayer" controls>
+            <source src="chanson_ebBNO5vz.mp4" type="video/mp4">
+            Votre navigateur ne supporte pas la lecture vidéo dommage.
+        </video>
+        <div class="controls">
+            <button onclick="jouer()">▶ Lire</button>
+            <button onclick="pause()">⏸ Pause</button>
+            <button onclick="pleinEcran()">⛶ Plein écran</button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        video.volume = 0.5;
+        
+        function jouer() {
+            video.play();
+        }
+        
+        function pause() {
+            video.pause();
+        }
+        
+        function pleinEcran() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
